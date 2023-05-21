@@ -1,2 +1,2 @@
- const configserver = "https://azman-api.lawcloud.page"
+ const configserver = "https://58.71.195.28:6980"
  export default configserver
