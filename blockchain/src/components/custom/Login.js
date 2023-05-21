@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+import configserver from "../../configs"
+
+
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -8,7 +11,7 @@ function Login() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    axios.post('http://localhost:8000/api/adminLogin', {
+    axios.post(configserver+'/api/adminLogin', {
       username: username,
       password: password,
     })

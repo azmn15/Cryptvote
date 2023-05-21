@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+import configserver from "../../configs"
+
+
 class NewElection extends Component {
 
     constructor(props) {
@@ -22,7 +25,7 @@ class NewElection extends Component {
         e.preventDefault();
         const { election_name, election_organizer, election_password } = this.state;
         console.log(election_name);
-        axios.post('http://localhost:8000/api/electionName', {
+        axios.post(configserver+'/api/electionName', {
             election_name: election_name,
             election_organizer: election_organizer,
             election_password: election_password

@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
+import configserver from "../../configs"
+
+
 class Choose extends Component {
 
     constructor(props) {
@@ -18,7 +21,7 @@ class Choose extends Component {
     componentDidMount(){
         let currentComponent = this;
       
-        axios.get('http://localhost:8000/api/electionName', {})
+        axios.get(configserver+'/api/electionName', {})
         .then(function(response){ 
             var data = response.data;
             currentComponent.setState({
