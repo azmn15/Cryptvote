@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
-import configserver from "../../configs"
+import configserver from "../../configs";
 
-
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+function Login({ login }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    axios.post(configserver+'/api/adminLogin', {
-      username: username,
-      password: password,
-    })
-    .then(function(response){ 
-      if(response.data){
-        window.location.assign("/newelection")
-      }else{
-        alert('Incorrect Username or Password');
-      }
-    })
-    .catch(function(err){
-      console.error(err);
-    });
+    axios
+      .post(configserver + "/api/adminLogin", {
+        username: username,
+        password: password,
+      })
+      .then(function (response) {
+        if (response.data) {
+          login();
+          //window.location.assign("/newelection")
+        } else {
+          alert("Incorrect Username or Password");
+        }
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
   };
 
   return (
-    <form className='container' onSubmit={handleSubmit}>
+    <form className="container" onSubmit={handleSubmit}>
       <label>
         Username:
-        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
+        <input
+          type="text"
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+        />
       </label>
       <br />
       <label>
         Password:
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+        <input
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
       </label>
       <br />
       <button type="submit">Login</button>

@@ -1,48 +1,57 @@
-import React, { Component } from 'react'
-import { NavLink, withRouter } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import { NavLink, withRouter } from "react-router-dom";
 
-class Navbar extends Component {
-    state = {
-        location: ""
-    }
+const Navbar = ({ history, isAuthenticated, logout }) => {
+  const [location, setLocation] = useState("");
 
-    componentWillReceiveProps(){
-        console.log(this.props)
-        this.setState({
-            location: this.props.history.location.pathname
-        })
-    }
-    render(){
+  useEffect(() => {
+    setLocation(history.location.pathname);
+  }, [history.location.pathname]);
 
-        if(this.state.location === "/" || this.state.location === "/choose"  || this.state.location === "/vote"  || this.state.location === "/login"){
-            return ( 
-                <nav className="nav-wrapper black darken-2">
-                    <div className="container">
-                        <a className="brand-logo">
-                            CrypVote
-                        </a>
-                    </div>
-                </nav>
-            )
-        }else{
-            return(
-                <nav className="nav-wrapper black darken-2">
-                    <div className="container">
-                        <a className="brand-logo">
-                            CrypVote
-                        </a>
-                        <ul className="right">
-                            <li><NavLink to="/">Home</NavLink></li>
-                            <li><NavLink to="/newelection">New Election</NavLink></li>
-                            <li><NavLink to="/elections">Elections</NavLink></li>
-                        </ul>
-                    </div>
-                </nav>
-            )
-        }
+  if (!isAuthenticated) {
+    return (
+      <nav className="nav-wrapper black darken-2">
+        <div className="container">
+          <a className="brand-logo">CrypVote</a>
+          {isAuthenticated && (
+            <ul className="right">
+              <li>
+                <button className="logout-button" onClick={logout}>
+                  Logout
+                </button>
+              </li>
+            </ul>
+          )}
+        </div>
+      </nav>
+    );
+  } else {
+    return (
+      <nav className="nav-wrapper black darken-2">
+        <div className="container">
+          <a className="brand-logo">CrypVote</a>
+          <ul className="right">
+            <li>
+              <NavLink to="/">Home</NavLink>
+            </li>
+            <li>
+              <NavLink to="/newelection">New Election</NavLink>
+            </li>
+            <li>
+              <NavLink to="/elections">Elections</NavLink>
+            </li>
+            {isAuthenticated && (
+              <li>
+                <button className="logout-button" onClick={logout}>
+                  Logout
+                </button>
+              </li>
+            )}
+          </ul>
+        </div>
+      </nav>
+    );
+  }
+};
 
-        
-    }
-}
-
-export default withRouter(Navbar)
+export default withRouter(Navbar);
