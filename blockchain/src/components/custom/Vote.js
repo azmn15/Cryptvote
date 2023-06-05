@@ -4,12 +4,27 @@ import Election from "../../build/Election.json";
 import { Link } from "react-router-dom";
 
 class Vote extends Component {
-  async componentWillMount() {
+  state = {
+    id: null,
+    account: "",
+    election: null,
+    candCount: 0,
+    candidates: [],
+    loading: true,
+    selectedId: null,
+    endTime: null,
+    hasVoted: false,
+  };
+
+  async componentDidMount() {
+    const id = this.props.match.params.id;
+    this.setState({ id });
     await this.loadWeb3();
     await this.loadBlockchainData();
+    this.checkElectionStatus();
   }
 
-  async loadWeb3() {
+  loadWeb3 = async () => {
     if (window.ethereum) {
       window.web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -20,12 +35,11 @@ class Vote extends Component {
         "Non-Ethereum browser detected. You should consider trying MetaMask!"
       );
     }
-  }
+  };
 
-  async loadBlockchainData() {
+  loadBlockchainData = async () => {
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
-    console.log(accounts);
     this.setState({ account: accounts[0] });
     const networkId = await web3.eth.net.getId();
     const networkData = Election.networks[networkId];
@@ -34,91 +48,105 @@ class Vote extends Component {
       this.setState({ election });
       const candCount = await election.methods.candidatesCount().call();
       this.setState({ candCount });
-      for (var i = 1; i <= candCount; i++) {
-        const candidates = await election.methods.candidates(i).call();
-        if (candidates.election_id === this.state.id) {
+      for (let i = 1; i <= candCount; i++) {
+        const candidate = await election.methods.candidates(i).call();
+        if (candidate.election_id === this.state.id) {
           this.setState({
-            candidates: [...this.state.candidates, candidates],
+            candidates: [...this.state.candidates, candidate],
           });
         }
       }
-      console.log(this.state.candidates);
     } else {
       window.alert("Election contract not deployed to detected network.");
     }
-  }
-
-  handleInputChange = (e) => {
-    console.log(e.target.id);
-    this.setState({
-      selectedId: e.target.id,
-    });
-    this.vote(e.target.id);
   };
 
-  vote(id) {
-    console.log(this.state.selectedId);
+  checkElectionStatus = () => {
+    const now = new Date().getTime();
+    const endTime = this.state.endTime;
+    if (endTime && endTime < now) {
+      this.setState({ hasVoted: true });
+    }
+  };
+
+  handleVote = (id) => {
+    if (this.state.hasVoted) {
+      window.alert("You may vote once.");
+      return;
+    }
+    this.setState({ selectedId: id });
+    this.vote(id);
+  };
+
+  vote = async (id) => {
     this.setState({ loading: true });
-    this.state.election.methods
-      .vote(id)
-      .send({ from: this.state.account })
-      .once("receipt", (receipt) => {
-        this.setState({ loading: false });
-        window.location.assign("/");
-      });
-  }
+    try {
+      await this.state.election.methods
+        .vote(id)
+        .send({ from: this.state.account });
+      this.setState({ loading: false, hasVoted: true });
+      window.location.assign("/");
+    } catch (error) {
+      console.error(error);
+      this.setState({ loading: false });
+    }
+  };
 
-  componentDidMount() {
-    let id = this.props.match.params.id;
-    this.setState({
-      id: id,
-    });
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      id: null,
-      account: "",
-      election: null,
-      candCount: 0,
-      candidates: [],
-      loading: true,
-      selectedId: null,
-    };
-  }
-
-  render() {
-    const electionList = this.state.candidates.map((candidates) => {
+  renderCandidates = () => {
+    const { candidates, hasVoted, selectedId } = this.state;
+    return candidates.map((candidate) => {
+      const { id, name, details } = candidate;
+      const isDisabled = hasVoted || selectedId === id;
       return (
-        <div className="contact" key={candidates.id}>
+        <div className="contact" key={id}>
           <li className="collection-item avatar">
             <i className="material-icons circle blue darken-2">ballot</i>
             <p>
-              <b>{candidates.name}</b>
+              <b>{name}</b>
             </p>
-            <p>{candidates.details}</p>
-            <a href="" className="secondary-content">
-              <button
-                id={candidates.id}
-                onClick={this.handleInputChange}
-                className="waves-effect waves-light btn blue darken-2"
-              >
-                Vote
-              </button>
-            </a>
+            <p>{details}</p>
+            <button
+              disabled={isDisabled}
+              id={id}
+              onClick={() => this.handleVote(id)}
+              className={`waves-effect waves-light btn blue darken-2 ${
+                isDisabled ? "disabled" : ""
+              }`}
+            >
+              {hasVoted ? "Voted" : "Vote"}
+            </button>
           </li>
         </div>
       );
     });
+  };
+
+  render() {
+    const { candidates, hasVoted, endTime } = this.state;
+    const electionList = candidates.length ? (
+      this.renderCandidates()
+    ) : (
+      <p>No candidates available.</p>
+    );
+
     return (
       <div className="container">
-        <ul className="collection">
-          <li className="collection-item avatar">
-            <h3>Candidates</h3>
-          </li>
-          {electionList}
-        </ul>
+        <h3>Candidates</h3>
+        {endTime ? (
+          hasVoted ? (
+            <p>You have already voted in this election.</p>
+          ) : (
+            <div>
+              <p>
+                This election will end at:{" "}
+                {new Date(endTime).toLocaleString()}
+              </p>
+              <ul className="collection">{electionList}</ul>
+            </div>
+          )
+        ) : (
+          <p>Election data loading...</p>
+        )}
       </div>
     );
   }
