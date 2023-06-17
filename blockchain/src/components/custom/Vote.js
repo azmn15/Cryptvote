@@ -129,10 +129,16 @@ class Vote extends Component {
       <p>No candidates available.</p>
     );
 
+    const now = new Date().getTime();
+    const electionEndTime = endTime ? new Date(endTime).getTime() : null;
+    const isElectionEnded = electionEndTime && electionEndTime < now;
+
     return (
       <div className="container">
         <h3>Candidates</h3>
-        {endTime ? (
+        {isElectionEnded ? (
+          <p>Election for this has ended.</p>
+        ) : endTime ? (
           hasVoted ? (
             <p>You have already voted in this election.</p>
           ) : (
@@ -153,3 +159,4 @@ class Vote extends Component {
 }
 
 export default Vote;
+

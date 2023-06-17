@@ -1,18 +1,24 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const electionName = mongoose.model('electionlists',{
-    election_id:{
-        type: Number
-    },
-    election_name: {
-        type: String
-    },
-    election_organizer: {
-        type: String
-    },
-    election_password: {
-        type: String
-    },
+const electionNameSchema = mongoose.Schema({
+  election_id: {
+    type: Number,
+  },
+  election_name: {
+    type: String,
+  },
+  election_organizer: {
+    type: String,
+  },
+  election_password: {
+    type: String,
+  },
+  election_end_datetime: {
+    type: Date,
+  },
 });
 
-module.exports = electionName
+const ElectionName = mongoose.model('electionlists', electionNameSchema);
+
+module.exports = ElectionName;
+
