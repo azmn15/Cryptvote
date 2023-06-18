@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import Web3 from "web3";
 import Election from "../../build/Election.json";
 import { Link } from "react-router-dom";
+import configserver from "../../configs";
+import axios from "axios";
 
 class Vote extends Component {
   state = {
@@ -14,6 +16,7 @@ class Vote extends Component {
     selectedId: null,
     endTime: null,
     hasVoted: false,
+    ElectionData: null,
   };
 
   async componentDidMount() {
@@ -21,7 +24,7 @@ class Vote extends Component {
     this.setState({ id });
     await this.loadWeb3();
     await this.loadBlockchainData();
-    this.checkElectionStatus();
+    await this.GetVoteDateTime(id);
   }
 
   loadWeb3 = async () => {
@@ -61,14 +64,6 @@ class Vote extends Component {
     }
   };
 
-  checkElectionStatus = () => {
-    const now = new Date().getTime();
-    const endTime = this.state.endTime;
-    if (endTime && endTime < now) {
-      this.setState({ hasVoted: true });
-    }
-  };
-
   handleVote = (id) => {
     if (this.state.hasVoted) {
       window.alert("You may vote once.");
@@ -76,6 +71,18 @@ class Vote extends Component {
     }
     this.setState({ selectedId: id });
     this.vote(id);
+  };
+
+  GetVoteDateTime = async (id) => {
+    const apiUrl = configserver + "/api/election/" + id;
+
+    try {
+      const response = await axios.get(apiUrl);
+      this.setState({ ElectionData: response.data });
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to fetch vote date and time");
+    }
   };
 
   vote = async (id) => {
@@ -113,7 +120,7 @@ class Vote extends Component {
                 isDisabled ? "disabled" : ""
               }`}
             >
-              {hasVoted ? "Voted" : "Vote"}
+              {hasVoted ? "Voted" : "vote"}
             </button>
           </li>
         </div>
@@ -121,37 +128,65 @@ class Vote extends Component {
     });
   };
 
+  isDatePast = (dateString) => {
+    const currentDate = new Date();
+    const providedDate = new Date(dateString);
+
+    return currentDate < providedDate;
+  };
+
+  formatDate = (dateString) => {
+    const date = new Date(dateString);
+
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: "UTC",
+    };
+
+    return date.toLocaleString("en-US", options);
+  };
+
   render() {
-    const { candidates, hasVoted, endTime } = this.state;
+    const { candidates, hasVoted, ElectionData } = this.state;
+    const nowDateTime = new Date();
     const electionList = candidates.length ? (
       this.renderCandidates()
     ) : (
       <p>No candidates available.</p>
     );
 
-    const now = new Date().getTime();
-    const electionEndTime = endTime ? new Date(endTime).getTime() : null;
-    const isElectionEnded = electionEndTime && electionEndTime < now;
-
     return (
       <div className="container">
         <h3>Candidates</h3>
-        {isElectionEnded ? (
-          <p>Election for this has ended.</p>
-        ) : endTime ? (
-          hasVoted ? (
-            <p>You have already voted in this election.</p>
+        {ElectionData ? (
+          this.isDatePast(ElectionData.election_end_date_time) ? (
+            hasVoted ? (
+              <p>You have already voted in this election.</p>
+            ) : (
+              <div>
+                <p>
+                  This election will end at:{" "}
+                  {this.formatDate(ElectionData.election_end_date_time)}
+                </p>
+                <ul className="collection">{electionList}</ul>
+              </div>
+            )
           ) : (
-            <div>
-              <p>
-                This election will end at:{" "}
-                {new Date(endTime).toLocaleString()}
-              </p>
-              <ul className="collection">{electionList}</ul>
-            </div>
+            <p>
+              Election Expired on{" "}
+              {this.formatDate(ElectionData.election_end_date_time)}
+            </p>
           )
         ) : (
-          <p>Election data loading...</p>
+          <>
+            <p>Standby</p>
+            <p>Election data is loading....</p>
+          </>
         )}
       </div>
     );
@@ -159,4 +194,3 @@ class Vote extends Component {
 }
 
 export default Vote;
-

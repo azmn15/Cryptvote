@@ -1,127 +1,97 @@
-import React, { Component } from 'react';
-import axios from 'axios';
-import DateTimePicker from 'react-datetime-picker';
+import React, { useState } from "react";
+import axios from "axios";
+import DateTimePicker from "react-datetime-picker";
 import configserver from "../../configs";
 
-import 'react-datetime-picker/dist/DateTimePicker.css';
+import "react-datetime-picker/dist/DateTimePicker.css";
+import "react-calendar/dist/Calendar.css";
+import "react-clock/dist/Clock.css";
 
-class NewElection extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      election_name: '',
-      election_organizer: '',
-      election_password: '',
-      election_end_date: new Date(),
-      election_end_time: new Date(),
-    };
-  }
+const NewElection = () => {
+  const [electionName, setElectionName] = useState("");
+  const [electionOrganizer, setElectionOrganizer] = useState("");
+  const [electionPassword, setElectionPassword] = useState("");
+  const [electionDateTime, setElectionDateTime] = useState(new Date());
 
-  handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    if (name === "election_name") setElectionName(value);
+    else if (name === "election_organizer") setElectionOrganizer(value);
+    else if (name === "election_password") setElectionPassword(value);
   };
 
-  handleDateChange = (name, value) => {
-    this.setState({ [name]: value });
+  const handleDateTimeChange = (value) => {
+    setElectionDateTime(value);
   };
 
-  handleTimeChange = (name, value) => {
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const { election_name, election_organizer, election_password, election_end_date, election_end_time } = this.state;
-    console.log(election_name);
-
+    console.log(electionDateTime.toISOString());
     axios
-      .post(configserver + '/api/electionName', {
-        election_name: election_name,
-        election_organizer: election_organizer,
-        election_password: election_password,
-        election_end_time: `${election_end_date.toISOString().split('T')[0]}T${election_end_time.toTimeString().split(' ')[0]}`,
+      .post(configserver + "/api/electionName", {
+        election_name: electionName,
+        election_organizer: electionOrganizer,
+        election_password: electionPassword,
+        election_end_date_time: electionDateTime.toISOString(),
       })
       .then(function (response) {
-        window.location.assign('/');
+        window.location.assign("/");
       })
       .catch(function (err) {
         console.error(err);
       });
   };
 
-  render() {
-    const { election_name, election_organizer, election_password, election_end_date, election_end_time } = this.state;
+  return (
+    <div className="container">
+      <h4>Create New Election</h4>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          id="election_name"
+          name="election_name"
+          value={electionName}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Name</label>
+        <br />
+        <input
+          type="text"
+          id="election_organizer"
+          name="election_organizer"
+          value={electionOrganizer}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Organizer</label>
+        <br />
+        <input
+          type="password"
+          id="election_password"
+          name="election_password"
+          value={electionPassword}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Password</label>
+        <br />
+        <div style={{ display: "inline-block", width: "100%" }}>
+          <DateTimePicker
+            onChange={handleDateTimeChange}
+            value={electionDateTime}
+          />
+        </div>
+        <label htmlFor="name">Election End Date</label>
 
-    return (
-      <div className="container">
-        <h4>Create New Election</h4>
-        <form onSubmit={this.handleSubmit}>
-          <input
-            type="text"
-            id="election_name"
-            name="election_name"
-            value={election_name}
-            onChange={this.handleInputChange}
-            required
-          />
-          <label htmlFor="name">Election Name</label>
-          <br />
-          <input
-            type="text"
-            id="election_organizer"
-            name="election_organizer"
-            value={election_organizer}
-            onChange={this.handleInputChange}
-            required
-          />
-          <label htmlFor="name">Election Organizer</label>
-          <br />
-          <input
-            type="password"
-            id="election_password"
-            name="election_password"
-            value={election_password}
-            onChange={this.handleInputChange}
-            required
-          />
-          <label htmlFor="name">Election Password</label>
-          <br />
-          <div style={{ display: 'inline-block', width: '100%' }}>
-            <DateTimePicker
-              id="election_end_date"
-              name="election_end_date"
-              value={election_end_date}
-              onChange={(value) => this.handleDateChange('election_end_date', value)}
-              required
-              format="dd-MM-y"
-              className="custom-datetime-picker"
-            />
-          </div>
-          <label htmlFor="name">Election End Date</label>
-          <br /><br />
-          <div style={{ display: 'inline-block', width: '100%' }}>
-            <DateTimePicker
-              id="election_end_time"
-              name="election_end_time"
-              value={election_end_time}
-              onChange={(value) => this.handleTimeChange('election_end_time', value)}
-              required
-              disableClock
-              format="HH:mm"
-              className="custom-datetime-picker"
-            />
-          </div>
-          <label htmlFor="name">Election End Time</label>
-          <br /><br />
-          <button className="btn blue darken-2" type="submit" name="action">
-            Submit
-            <i className="material-icons right">send</i>
-          </button>
-        </form>
-      </div>
-    );
-  }
-}
+        <br />
+        <button className="btn blue darken-2" type="submit" name="action">
+          Submit
+          <i className="material-icons right">send</i>
+        </button>
+      </form>
+    </div>
+  );
+};
 
 export default NewElection;

@@ -38,6 +38,21 @@ app.get("/api/electionName", function (req, res) {
   });
 });
 
+app.get("/api/election/:id", function (req, res) {
+  const electionId = req.params.id;
+
+  electionName.findOne({ election_id: electionId }, function (err, election) {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    } else if (!election) {
+      res.status(404).send("Election not found");
+    } else {
+      res.send(election);
+    }
+  });
+});
+
 app.post("/api/electionName", async function (req, res) {
   electionName
     .create({
@@ -45,6 +60,7 @@ app.post("/api/electionName", async function (req, res) {
       election_name: req.body.election_name,
       election_organizer: req.body.election_organizer,
       election_password: md5(req.body.election_password),
+      election_end_date_time: req.body.election_end_date_time,
     })
     .then((election) => {
       res.json(election);

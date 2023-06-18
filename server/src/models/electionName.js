@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const electionNameSchema = mongoose.Schema({
   election_id: {
@@ -13,12 +13,11 @@ const electionNameSchema = mongoose.Schema({
   election_password: {
     type: String,
   },
-  election_end_datetime: {
-    type: Date,
+  election_end_date_time: {
+    type: String,
   },
 });
 
-const ElectionName = mongoose.model('electionlists', electionNameSchema);
+const ElectionName = mongoose.model("electionlists", electionNameSchema);
 
 module.exports = ElectionName;
-
