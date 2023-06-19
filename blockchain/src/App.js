@@ -4,6 +4,7 @@ import NavBar from "./components/custom/Navbar";
 import Home from "./components/custom/Home";
 import Vote from "./components/custom/Vote";
 import VoteCount from "./components/custom/VoteCount";
+import CountUser from "./components/custom/CountUser";
 import ElectionData from "./components/custom/ElectionData";
 import Choose from "./components/custom/Choose";
 import { BrowserRouter, Route, Redirect, Switch } from "react-router-dom";
@@ -36,6 +37,7 @@ class App extends Component {
           <Switch>
             <Route exact path="/" component={Home} />
             <Route exact path="/elections" component={ElectionData} />
+            <Route exact path="/result" component={CountUser}/>
             <Route exact path="/candidates/:id" component={NewCandidate} />
             <Route exact path="/vote/:id" component={Vote} />
             <Route exact path="/choose" component={Choose} />
@@ -50,11 +52,11 @@ class App extends Component {
                 )
               }
             />
-            <ProtectedRoute
+            {/* <ProtectedRoute
               isAuthenticated={isAuthenticated}
               path="/voteCount/:id"
               component={VoteCount}
-            />
+            /> */}
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
               path="/newelection"

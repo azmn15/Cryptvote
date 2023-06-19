@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 import configserver from "../../configs";
 
@@ -62,6 +63,10 @@ const Choose = () => {
           Submit
         </button>
       </form>
+      <br></br>
+      <Link to="/result">
+        <button className="btn">View Result</button>
+      </Link>
     </div>
   );
 };
