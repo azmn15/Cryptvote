@@ -1,61 +1,97 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
+import DateTimePicker from "react-datetime-picker";
+import configserver from "../../configs";
 
-import configserver from "../../configs"
+import "react-datetime-picker/dist/DateTimePicker.css";
+import "react-calendar/dist/Calendar.css";
+import "react-clock/dist/Clock.css";
 
+const NewElection = () => {
+  const [electionName, setElectionName] = useState("");
+  const [electionOrganizer, setElectionOrganizer] = useState("");
+  const [electionPassword, setElectionPassword] = useState("");
+  const [electionDateTime, setElectionDateTime] = useState(new Date());
 
-class NewElection extends Component {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "election_name") setElectionName(value);
+    else if (name === "election_organizer") setElectionOrganizer(value);
+    else if (name === "election_password") setElectionPassword(value);
+  };
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            election_name: '',
-            election_organizer: '',
-            election_password: '',
-        };
-    }
+  const handleDateTimeChange = (value) => {
+    setElectionDateTime(value);
+  };
 
-    handleInputChange = e => {
-        this.setState({
-        [e.target.name]: e.target.value,
-        });
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(electionDateTime.toISOString());
+    axios
+      .post(configserver + "/api/electionName", {
+        election_name: electionName,
+        election_organizer: electionOrganizer,
+        election_password: electionPassword,
+        election_end_date_time: electionDateTime.toISOString(),
+      })
+      .then(function (response) {
+        window.location.assign("/");
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
+  };
 
-    handleSubmit = (e) => {
-        e.preventDefault();
-        const { election_name, election_organizer, election_password } = this.state;
-        console.log(election_name);
-        axios.post(configserver+'/api/electionName', {
-            election_name: election_name,
-            election_organizer: election_organizer,
-            election_password: election_password
-        })
-        .then(function(response){ 
-            window.location.assign('/');
-        })
-        .catch(function(err){
-            console.error(err);
-        });
-    }
+  return (
+    <div className="container">
+      <h4>Create New Election</h4>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          id="election_name"
+          name="election_name"
+          value={electionName}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Name</label>
+        <br />
+        <input
+          type="text"
+          id="election_organizer"
+          name="election_organizer"
+          value={electionOrganizer}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Organizer</label>
+        <br />
+        <input
+          type="password"
+          id="election_password"
+          name="election_password"
+          value={electionPassword}
+          onChange={handleInputChange}
+          required
+        />
+        <label htmlFor="name">Election Password</label>
+        <br />
+        <div style={{ display: "inline-block", width: "100%" }}>
+          <DateTimePicker
+            onChange={handleDateTimeChange}
+            value={electionDateTime}
+          />
+        </div>
+        <label htmlFor="name">Election End Date</label>
 
-    render(){
-        return(
-            <div className="container">
-                <h4>Create New Election</h4>
-                    <form onSubmit={this.handleSubmit}>
-                        <input type="text" id="election_name" name="election_name" onChange={this.handleInputChange} required/>
-                        <label htmlFor="name">Election Name</label><br></br>
-                        <input type="text" id="election_organizer" name="election_organizer" onChange={this.handleInputChange} required/>
-                        <label htmlFor="name">Election Organizer</label><br></br>
-                        <input type="password" id="election_password" name="election_password" onChange={this.handleInputChange} required/>
-                        <label htmlFor="name">Election Password</label><br></br><br></br>
-                        <button className="btn blue darken-2" type="submit" name="action">Submit
-                            <i className="material-icons right">send</i>
-                        </button>
-                    </form>
-            </div>
-        )
-    }
-}
+        <br />
+        <button className="btn blue darken-2" type="submit" name="action">
+          Submit
+          <i className="material-icons right">send</i>
+        </button>
+      </form>
+    </div>
+  );
+};
 
 export default NewElection;
