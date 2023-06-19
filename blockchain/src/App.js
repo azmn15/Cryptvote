@@ -41,6 +41,8 @@ class App extends Component {
             <Route exact path="/candidates/:id" component={NewCandidate} />
             <Route exact path="/vote/:id" component={Vote} />
             <Route exact path="/choose" component={Choose} />
+            <Route exact path="/voteCount/:id" component={VoteCount}
+            />
             <Route
               exact
               path="/login"
@@ -52,11 +54,6 @@ class App extends Component {
                 )
               }
             />
-            {/* <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              path="/voteCount/:id"
-              component={VoteCount}
-            /> */}
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
               path="/newelection"
